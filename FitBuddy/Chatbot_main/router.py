@@ -19,7 +19,7 @@ class ChatReq(BaseModel):
 class ChatRes(BaseModel):
     reply: str
 
-@router.post("/chat", response_model=ChatRes)   # ★ 수정됨 (/api/chat)
+@router.post("/chat", response_model=ChatRes)   # 최종 경로: POST /api/chat
 def chat(
     req: ChatReq,
     db: Session = Depends(get_db),

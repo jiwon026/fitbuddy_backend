@@ -7,7 +7,6 @@
 from sqlalchemy.orm import Session
 from database import SessionLocal, engine, Base  # ← FitBuddy/database.py 재사용
 
-
 # FastAPI 의존성 주입용
 def get_db() -> Session:
     db = SessionLocal()

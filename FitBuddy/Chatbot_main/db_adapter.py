@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import Session
 
-from models import User, Workout              # FitBuddy 메인 모델
+from models import User, Workout     # FitBuddy 메인 모델
 from Chatbot_main.models import ChatLog       # 챗봇용 대화 로그 모델
 
 
