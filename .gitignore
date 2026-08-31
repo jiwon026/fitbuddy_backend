@@ -36,3 +36,8 @@ Thumbs.db
 *.manifest
 *.spec
 
+
+# 대용량 원본 데이터 (공공데이터포털 체육시설 CSV, 합계 약 300MB)
+# GitHub 100MB 파일 제한에 걸리므로 저장소에 포함하지 않습니다.
+# load_facilities.py 로 DB에 적재해 사용하세요.
+FitBuddy/data/
