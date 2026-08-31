@@ -6,7 +6,6 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
 # PostgreSQL DB 연결 URL
-# !!! 중요: <YOUR_ACTUAL_PASSWORD> 부분을 실제 설정했던 비밀번호로 변경하세요 !!!
 DATABASE_URL = "postgresql+psycopg2://postgres:0226@localhost:5432/fitbuddy"
 
 

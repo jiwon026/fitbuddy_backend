@@ -1,33 +1,29 @@
-from typing import Dict
+from typing import List, Optional
 
 import base64
 import cv2
-from models import Base
-from database import engine
 import numpy as np
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 
+from database import engine, SessionLocal, get_db
+from models import Base, User
+from user_manager import hash_password
 from pose_detector import PoseDetector
 from angles import extract_angles
-from database import SessionLocal, get_db
-from models import User
-from user_manager import hash_password
-from typing import Dict
-from fastapi import FastAPI
-from pydantic import BaseModel
 
 from Chatbot_main.router import router as chatbot_router
-
 from Chatbot_main.LLM.load_model import get_llm
+from facility_router import router as facility_router
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
 
 app.include_router(chatbot_router)
+app.include_router(facility_router)
 
 # CORS 설정 (프론트엔드에서 접근 가능하도록)
 app.add_middleware(
@@ -38,6 +34,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.on_event("startup")
+def load_llm_on_startup():
+    # 서버가 뜰 때 한 번만 모델 로딩
+    print("[STARTUP] LLM 로딩 시작")
+    model, tokenizer = get_llm()
+    print("[STARTUP] LLM 로딩 완료")
 
 # ==============================
 # 요청/응답 모델 정의 (회원가입/로그인)
@@ -76,25 +78,28 @@ class UserInfoResponse(BaseModel):
 
 
 
+
 # ==============================
 # 포즈 분석용 요청/응답 모델
 # ==============================
 class PoseRequest(BaseModel):
     image_base64: str  # 클라이언트가 보내는 이미지(Base64)
 
+class PosePoint(BaseModel):
+    id: int        # 관절 인덱스 (0~32)
+    x: float       # 0~1 정규화 x좌표
+    y: float       # 0~1 정규화 y좌표
+    score: float   # 신뢰도(0~1)
 
 class PoseResponse(BaseModel):
     knee_angle: float
     hip_angle: float
     torso_tilt: float
     feedback: str
+    keypoints: Optional[List[PosePoint]] = None  
 
-@app.on_event("startup")
-def load_llm_on_startup():
-    # 서버가 뜰 때 한 번만 모델 로딩
-    print("[STARTUP] LLM 로딩 시작")
-    model, tokenizer = get_llm()
-    print("[STARTUP] LLM 로딩 완료")
+
+
 
 # ==============================
 # 기본 ping 엔드포인트
@@ -256,6 +261,17 @@ def analyze_pose(req: PoseRequest):
         )
 
     kpts = pose.to_numpy()
+    points: list[PosePoint] = []
+    for i, (x, y, s) in enumerate(kpts):
+        # 너무 신뢰도 낮은 점은 제외하고 싶으면 아래처럼 threshold 걸어도 됨
+        if s < 0.3:
+            continue
+        points.append(PosePoint(
+            id=i,
+            x=float(x),
+            y=float(y),
+            score=float(s),
+        ))
 
     # 3. 각도 계산
     h, w = frame.shape[:2]
@@ -265,7 +281,7 @@ def analyze_pose(req: PoseRequest):
     hip = float(ang.get("hip", -1))
     tilt = float(ang.get("torso_tilt", -1))
 
-    # 4. 피드백 생성 로직 (예시)
+    # 4. 피드백 생성 로직
     if knee < 40:
         fb = "너무 깊어요! 무릎을 조금 펴주세요."
     elif knee < 70:
@@ -280,5 +296,7 @@ def analyze_pose(req: PoseRequest):
         knee_angle=knee,
         hip_angle=hip,
         torso_tilt=tilt,
-        feedback=fb
+        feedback=fb,
+        keypoints=points,   # ✅ 여기에 포함
     )
+
