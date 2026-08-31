@@ -23,9 +23,9 @@ try:
     from .models import Workout, WorkoutFrame
 except ImportError:
     # 직접 실행할 때를 위한 절대 import
-from pose_detector import PoseDetector
-from angles import extract_angles
-from utils import EMA, RingBuffer
+    from pose_detector import PoseDetector
+    from angles import extract_angles
+    from utils import EMA, RingBuffer
     from database import SessionLocal
     from models import Workout, WorkoutFrame
 
@@ -64,7 +64,7 @@ def update_workout_session_end_time(workout_id, duration_seconds, distance_km):
             workout.duration_seconds = duration_seconds
             workout.distance_km = distance_km
             db.commit()
-        print(f"운동 세션 {workout_id} 종료 시간 및 요약 정보 업데이트 완료.")
+            print(f"운동 세션 {workout_id} 종료 시간 및 요약 정보 업데이트 완료.")
         else:
             print(f"운동 세션 {workout_id}를 찾을 수 없습니다.")
     except Exception as error:
@@ -72,6 +72,7 @@ def update_workout_session_end_time(workout_id, duration_seconds, distance_km):
         db.rollback()
     finally:
         db.close()
+
 
 def save_frame_data(workout_id, frame_number, knee_angle, hip_angle, torso_tilt_angle, kpts_data, main_joint_loc):
     """
