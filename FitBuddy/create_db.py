@@ -1,7 +1,7 @@
 # FitBuddy/create_db.py
 
-from .database import engine, Base # database.py에서 engine과 Base 임포트
-from .models import SportsFacility, User, Workout, WorkoutFrame # models.py에서 모든 모델 임포트
+from database import engine, Base # database.py에서 engine과 Base 임포트
+from models import SportsFacility, User, Workout, WorkoutFrame # models.py에서 모든 모델 임포트
 
 def create_db_tables():
     print("데이터베이스 테이블을 생성합니다...")
