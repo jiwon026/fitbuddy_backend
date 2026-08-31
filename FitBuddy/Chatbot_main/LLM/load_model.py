@@ -19,9 +19,9 @@ def get_llm():
 
     _model = AutoModelForCausalLM.from_pretrained(
         MODEL_NAME,
-        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-        device_map="auto",
-    )
+        torch_dtype=torch.float16
+    ) 
+
     print("[LLM] 모델 로딩 완료")
 
     return _model, _tokenizer
