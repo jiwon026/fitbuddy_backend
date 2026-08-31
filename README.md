@@ -126,3 +126,4 @@ python -m FitBuddy.user_manager create --email a@b.com --name 홍길동 \
 - CORS가 `allow_origins=["*"]`로 열려 있습니다.
 - `/pose/analyze`는 요청마다 `PoseDetector`를 새로 만듭니다. 프레임을 자주 보내면 병목이 됩니다.
 - LLM을 `float16`으로 고정 로딩합니다. CUDA가 없는 환경에서는 CPU가 fp16을 에뮬레이션하므로 fp32보다 오히려 느릴 수 있습니다.
+
